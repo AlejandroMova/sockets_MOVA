@@ -6,14 +6,14 @@ from dotenv import load_dotenv
 import os
 from github import Github
 from github import Auth
-
+import subprocess
 
 load_dotenv()
 
 # variables de env
 access_token = os.getenv('TOKEN')
 key = os.getenv('KEY')
-repository_name = os.getenv('REP_NAME')
+repository = os.getenv('REPO')
 
 def generate_key(length=8):
     alphabet = string.ascii_letters + string.digits
@@ -49,22 +49,13 @@ while True:
                 # check if key was provided
                 if data_list[1] == key: 
 
-                    # initialize github module
-                    auth = Auth.Token(access_token)
-                    g = Github(auth=auth)
-                    repo = g.get_repo(repository_name)
-
                     # check commits 
                     if data_list[0] == 'VERSION': 
                         
                         try: 
                             
-                            commits = repo.get_commits()
-                            commits_list = []
-                            for commit in commits: 
-                                commits_list.append(commit)
-                            response = ','.join(commits_list).encode()
-                            
+                            result = subprocess.run(['git', 'log'], capture_output=True, text=True)
+                            response = str(result.stdout).encode()
                         except Exception as e: 
                             response = str(e).encode()
                             print(e)
@@ -74,9 +65,9 @@ while True:
                         response = 'Haciendo pull'.encode()
                         try: 
                             # pull hacia el repositorio
-                            pr = repo.create_pull(base='main', head='main', body='Pull para servidor', title='Pull')
-
-
+                            result = subprocess.run(['git', 'pull', repository, 'main'], capture_output=True, text=True)
+                            response = str(result.stdout).encode()
+                            
                         except Exception as e:
                             print(e)
                             response = str(e).encode()
