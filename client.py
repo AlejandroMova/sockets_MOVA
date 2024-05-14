@@ -1,11 +1,15 @@
 # echo-client.py
-
+from dotenv import load_dotenv
 import socket
+import os
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 65432  # The port used by the server
 
-key = input("Enter key: ")
+load_dotenv()
+
+key = os.getenv('KEY')
+#key = input("Enter key: ")
 
 option = ''
 while True: 
