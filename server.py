@@ -48,8 +48,8 @@ while True:
            
                 if verifyHash(date, msg, os.getenv('KEY'), key):
                     try:          
- 
-                        result = subprocess.run([msg], capture_output=True, text=True)
+       
+                        result = subprocess.run([os.getenv(msg)], capture_output=True, text=True)
                         response = str(result.stdout).encode()
                             
                     except Exception as e:
