@@ -5,6 +5,7 @@ import os
 import subprocess
 from hash import hashIt
 from hash import verifyHash
+import json
 
 load_dotenv()
 
@@ -34,53 +35,29 @@ while True:
                     print(f"Conexión con {addr} cerrada")
                     break
 
-                data_list = data.decode().split(',')
+                data_list = data.decode()
                 print('Recibido: ', data_list)
-
-
-                # get date from data_list
-                date = eval(data_list[0] + "}")
-                date = date['date']
-                # get key from data_list 
-                key = eval("{" + data_list[2])
-                key = key['token']
-                # get message from data_list
-                msg = eval("{" + data_list[1] + "}")
-                msg = msg['message']
-                message = msg.upper()
                 
+                data = json.loads(data_list)
+                
+                date = data['date']
+                msg = data['message']
+                key = data['token']
 
                 # check if key was provided
            
                 if verifyHash(date, msg, os.getenv('KEY'), key):
-
-                    # check commits 
-                    if message == 'VERSION': 
-                        print('Revisando version')
-                        
-                        try: 
-               
-                            result = subprocess.run(['git','log'], capture_output=True, text=True)
-                            response = str(result.stdout).encode()
-                        except Exception as e: 
-                            response = str(e).encode()
-                            print(e)
+                    try:          
+ 
+                        result = subprocess.run([msg], capture_output=True, text=True)
+                        response = str(result.stdout).encode()
                             
-                    # pull the repository
-                    elif message == 'PULL':
-                        response = 'Haciendo pull'.encode()
-                        print('Haciendo pull')
-                        try: 
-                            # pull hacia el repositorio
-                       
-                            result = subprocess.run(['git', 'pull', REPOSITORY, 'main'], capture_output=True, text=True)
-                            response = str(result.stdout).encode()
-                            
-                        except Exception as e:
-                            print(e)
-                            response = str(e).encode()
+                    except Exception as e:
+                        print(e)
+                        response = str(e).encode()
 
                 # si la contraseña es incorrecta 
                 else: 
                     response = 'Key incorrecta'.encode()
                 conn.sendall(response)
+

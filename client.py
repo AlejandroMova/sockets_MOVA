@@ -41,16 +41,7 @@ def main(host, port, call):
                 print(f"Recibido de servidor {PORT}: {data!r}")
             except: 
                 print(f'HOST: "{h}" did not connect')
-            
 
-       
-
-
-
-
-
-
-    
 
 if __name__ == '__main__':
     main()
