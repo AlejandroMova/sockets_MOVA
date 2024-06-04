@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import subprocess
 from hash import hashIt
-from hash import verifyHash
+from hash import verifyHash, chkCall, CustomError
 import json
 
 load_dotenv()
@@ -42,13 +42,15 @@ while True:
                 
                 date = data['date']
                 msg = data['message']
-                key = data['token']
+                signed = data['token']
 
                 # check if key was provided
            
-                if verifyHash(date, msg, os.getenv('KEY'), key):
+                if verifyHash(date, msg, signed, os.getenv('KEY')):
                     try:          
-       
+                        # Verificamos existencia de comando
+                        cmd = chkCall(str(msg).upper())
+                        if not cmd==True: raise CustomError(cmd)
                         result = subprocess.run([os.getenv(msg)], capture_output=True, text=True)
                         response = str(result.stdout).encode()
                             

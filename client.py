@@ -2,13 +2,12 @@
 from dotenv import load_dotenv
 import socket
 import os, click, json
-from hash import hashIt
+from hash import hashIt, chkCall
 
 load_dotenv()
 
 HOST = os.getenv('SERVERS').split(',')  # The server's hostname or IP address
 PORT = int(os.getenv("PORT"))  # The port used by the server
-PREFIJO='SH_'
 TOKEN = os.getenv('KEY')
 
 @click.command()
@@ -23,8 +22,8 @@ def main(host, port, call):
         host = [host]
  
     if not port: port=PORT
-    cmd = os.getenv(f"{PREFIJO}{str(call).upper()}")
-    if not cmd: click.echo(click.style(f"Call not found...", fg='red', bold=True))
+    cmd = chkCall(str(call).upper())
+    if not cmd==True: click.echo(click.style(cmd, fg='red', bold=True))
 
     print(host)
     for h in host: 
@@ -39,7 +38,7 @@ def main(host, port, call):
                 s.sendall(message.encode())
                 data = s.recv(1024)
                 print(f"Recibido de servidor {PORT}: {data!r}")
-            except: 
+            except:
                 print(f'HOST: "{h}" did not connect')
 
 
