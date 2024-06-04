@@ -2,13 +2,23 @@
 from dotenv import load_dotenv
 import socket
 import os, click, json
-from hash import hashIt, chkCall
+from hash import hashIt, chkCall, format_output
 
 load_dotenv()
 
 HOST = os.getenv('SERVERS').split(',')  # The server's hostname or IP address
 PORT = int(os.getenv("PORT"))  # The port used by the server
 TOKEN = os.getenv('KEY')
+
+# función para recibir más información
+def recv_all(conn, buffer_size=8000): 
+    data = b''
+    while True: 
+        part = conn.recv(buffer_size)
+        data += part
+        if len(part) < buffer_size: 
+            break
+    return data
 
 @click.command()
 @click.option('--host', default='all', help='set hoat to connect at ')
@@ -36,11 +46,12 @@ def main(host, port, call):
                 msg = hashIt(token=TOKEN, msg=call)
                 message = json.dumps(msg)
                 s.sendall(message.encode())
-                data = s.recv(1024)
-                print(f"Recibido de servidor {PORT}: {data!r}")
-            except:
+                data = recv_all(s)
+                print(f"Recibido de servidor {PORT}: {format_output(data)}")
+            except Exception as e:
+                
                 print(f'HOST: "{h}" did not connect')
-
+                print(e)
 
 if __name__ == '__main__':
     main()

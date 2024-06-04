@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import subprocess
 from hash import hashIt
-from hash import verifyHash, chkCall, CustomError
+from hash import verifyHash, chkCall, CustomError, format_output
 import json
 
 load_dotenv()
@@ -39,19 +39,22 @@ while True:
                 print('Recibido: ', data_list)
                 
                 data = json.loads(data_list)
+                print('diccionario... ')
                 
                 date = data['date']
                 msg = data['message']
                 signed = data['token']
 
+
                 # check if key was provided
-           
+                response = ''
                 if verifyHash(date, msg, signed, os.getenv('KEY')):
                     try:          
                         # Verificamos existencia de comando
                         cmd = chkCall(str(msg).upper())
-                        if not cmd==True: raise CustomError(cmd)
-                        result = subprocess.run([os.getenv(msg)], capture_output=True, text=True)
+                        print("Running...", cmd)
+                        result = subprocess.run([cmd], capture_output=True, text=True)
+
                         response = str(result.stdout).encode()
                             
                     except Exception as e:
@@ -60,6 +63,9 @@ while True:
 
                 # si la contraseña es incorrecta 
                 else: 
+                    print('No verificado... ')
                     response = 'Key incorrecta'.encode()
                 conn.sendall(response)
+                conn.close()
+                break
 
